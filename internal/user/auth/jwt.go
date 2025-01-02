@@ -3,8 +3,9 @@ package auth
 import (
 	"time"
 
+	"my-backend-project/internal/user/model"
+
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/my-backend-project/internal/user/model"
 )
 
 type JWTClaims struct {

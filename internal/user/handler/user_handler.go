@@ -3,10 +3,11 @@ package handler
 import (
 	"net/http"
 
+	"my-backend-project/internal/user/auth"
+	"my-backend-project/internal/user/model"
+	"my-backend-project/internal/user/service"
+
 	"github.com/labstack/echo/v4"
-	"github.com/my-backend-project/internal/user/auth"
-	"github.com/my-backend-project/internal/user/model"
-	"github.com/my-backend-project/internal/user/service"
 )
 
 type UserHandler struct {
