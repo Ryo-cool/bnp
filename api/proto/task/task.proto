@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package task;
+
+option go_package = "my-backend-project/internal/task/pb";
+
+import "google/protobuf/timestamp.proto";
+
+// タスクのステータス
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_ACTIVE = 2;
+  TASK_STATUS_COMPLETE = 3;
+}
+
+// タスク
+message Task {
+  string task_id = 1;
+  string user_id = 2;
+  string title = 3;
+  string description = 4;
+  TaskStatus status = 5;
+  google.protobuf.Timestamp due_date = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// タスク作成リクエスト
+message CreateTaskRequest {
+  string user_id = 1;
+  string title = 2;
+  string description = 3;
+  TaskStatus status = 4;
+  google.protobuf.Timestamp due_date = 5;
+}
+
+// タスク取得リクエスト
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+// タスク一覧取得リクエスト
+message ListTasksRequest {
+  string user_id = 1;
+  TaskStatus status = 2;
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+// タスク一覧取得レスポンス
+message ListTasksResponse {
+  repeated Task tasks = 1;
+  int32 total_count = 2;
+  string next_page_token = 3;
+}
+
+// タスク更新リクエスト
+message UpdateTaskRequest {
+  string task_id = 1;
+  string user_id = 2;
+  string title = 3;
+  string description = 4;
+  TaskStatus status = 5;
+  google.protobuf.Timestamp due_date = 6;
+}
+
+// タスク削除リクエスト
+message DeleteTaskRequest {
+  string task_id = 1;
+}
+
+// 空のレスポンス
+message Empty {}
+
+// タスクサービス
+service TaskService {
+  // タスクを作成
+  rpc CreateTask(CreateTaskRequest) returns (Task) {}
+  // タスクを取得
+  rpc GetTask(GetTaskRequest) returns (Task) {}
+  // タスク一覧を取得
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse) {}
+  // タスクを更新
+  rpc UpdateTask(UpdateTaskRequest) returns (Task) {}
+  // タスクを削除
+  rpc DeleteTask(DeleteTaskRequest) returns (Empty) {}
+} 

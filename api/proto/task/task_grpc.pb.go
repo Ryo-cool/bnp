@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.26.1
-// source: proto/task/task.proto
+// source: api/proto/task/task.proto
 
 package pb
 
@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -30,12 +29,19 @@ const (
 // TaskServiceClient is the client API for TaskService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// タスクサービス
 type TaskServiceClient interface {
-	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*CreateTaskResponse, error)
-	GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*GetTaskResponse, error)
+	// タスクを作成
+	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*Task, error)
+	// タスクを取得
+	GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*Task, error)
+	// タスク一覧を取得
 	ListTasks(ctx context.Context, in *ListTasksRequest, opts ...grpc.CallOption) (*ListTasksResponse, error)
-	UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*UpdateTaskResponse, error)
-	DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// タスクを更新
+	UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*Task, error)
+	// タスクを削除
+	DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type taskServiceClient struct {
@@ -46,9 +52,9 @@ func NewTaskServiceClient(cc grpc.ClientConnInterface) TaskServiceClient {
 	return &taskServiceClient{cc}
 }
 
-func (c *taskServiceClient) CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*CreateTaskResponse, error) {
+func (c *taskServiceClient) CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*Task, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateTaskResponse)
+	out := new(Task)
 	err := c.cc.Invoke(ctx, TaskService_CreateTask_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -56,9 +62,9 @@ func (c *taskServiceClient) CreateTask(ctx context.Context, in *CreateTaskReques
 	return out, nil
 }
 
-func (c *taskServiceClient) GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*GetTaskResponse, error) {
+func (c *taskServiceClient) GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*Task, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetTaskResponse)
+	out := new(Task)
 	err := c.cc.Invoke(ctx, TaskService_GetTask_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -76,9 +82,9 @@ func (c *taskServiceClient) ListTasks(ctx context.Context, in *ListTasksRequest,
 	return out, nil
 }
 
-func (c *taskServiceClient) UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*UpdateTaskResponse, error) {
+func (c *taskServiceClient) UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*Task, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateTaskResponse)
+	out := new(Task)
 	err := c.cc.Invoke(ctx, TaskService_UpdateTask_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -86,9 +92,9 @@ func (c *taskServiceClient) UpdateTask(ctx context.Context, in *UpdateTaskReques
 	return out, nil
 }
 
-func (c *taskServiceClient) DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *taskServiceClient) DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, TaskService_DeleteTask_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -99,12 +105,19 @@ func (c *taskServiceClient) DeleteTask(ctx context.Context, in *DeleteTaskReques
 // TaskServiceServer is the server API for TaskService service.
 // All implementations must embed UnimplementedTaskServiceServer
 // for forward compatibility.
+//
+// タスクサービス
 type TaskServiceServer interface {
-	CreateTask(context.Context, *CreateTaskRequest) (*CreateTaskResponse, error)
-	GetTask(context.Context, *GetTaskRequest) (*GetTaskResponse, error)
+	// タスクを作成
+	CreateTask(context.Context, *CreateTaskRequest) (*Task, error)
+	// タスクを取得
+	GetTask(context.Context, *GetTaskRequest) (*Task, error)
+	// タスク一覧を取得
 	ListTasks(context.Context, *ListTasksRequest) (*ListTasksResponse, error)
-	UpdateTask(context.Context, *UpdateTaskRequest) (*UpdateTaskResponse, error)
-	DeleteTask(context.Context, *DeleteTaskRequest) (*emptypb.Empty, error)
+	// タスクを更新
+	UpdateTask(context.Context, *UpdateTaskRequest) (*Task, error)
+	// タスクを削除
+	DeleteTask(context.Context, *DeleteTaskRequest) (*Empty, error)
 	mustEmbedUnimplementedTaskServiceServer()
 }
 
@@ -115,19 +128,19 @@ type TaskServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTaskServiceServer struct{}
 
-func (UnimplementedTaskServiceServer) CreateTask(context.Context, *CreateTaskRequest) (*CreateTaskResponse, error) {
+func (UnimplementedTaskServiceServer) CreateTask(context.Context, *CreateTaskRequest) (*Task, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTask not implemented")
 }
-func (UnimplementedTaskServiceServer) GetTask(context.Context, *GetTaskRequest) (*GetTaskResponse, error) {
+func (UnimplementedTaskServiceServer) GetTask(context.Context, *GetTaskRequest) (*Task, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTask not implemented")
 }
 func (UnimplementedTaskServiceServer) ListTasks(context.Context, *ListTasksRequest) (*ListTasksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTasks not implemented")
 }
-func (UnimplementedTaskServiceServer) UpdateTask(context.Context, *UpdateTaskRequest) (*UpdateTaskResponse, error) {
+func (UnimplementedTaskServiceServer) UpdateTask(context.Context, *UpdateTaskRequest) (*Task, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTask not implemented")
 }
-func (UnimplementedTaskServiceServer) DeleteTask(context.Context, *DeleteTaskRequest) (*emptypb.Empty, error) {
+func (UnimplementedTaskServiceServer) DeleteTask(context.Context, *DeleteTaskRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTask not implemented")
 }
 func (UnimplementedTaskServiceServer) mustEmbedUnimplementedTaskServiceServer() {}
@@ -270,5 +283,5 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/task/task.proto",
+	Metadata: "api/proto/task/task.proto",
 }

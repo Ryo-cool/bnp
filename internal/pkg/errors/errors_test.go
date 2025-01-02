@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestAppError_Error(t *testing.T) {
@@ -18,7 +19,6 @@ func TestAppError_Error(t *testing.T) {
 		{
 			name: "with wrapped error",
 			err: &AppError{
-				Code:    InvalidInput,
 				Message: "invalid input",
 				Err:     errors.New("field required"),
 			},
@@ -27,7 +27,6 @@ func TestAppError_Error(t *testing.T) {
 		{
 			name: "without wrapped error",
 			err: &AppError{
-				Code:    NotFound,
 				Message: "not found",
 			},
 			want: "not found",
@@ -72,7 +71,7 @@ func TestAppError_GRPCStatus(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			status := tt.err.GRPCStatus()
+			status := status.Convert(tt.err)
 			assert.Equal(t, tt.wantCode, status.Code())
 		})
 	}
