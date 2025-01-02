@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/my-backend-project/internal/user/auth"
-	"github.com/my-backend-project/internal/user/model"
-	"github.com/my-backend-project/internal/user/repository"
+	"my-backend-project/internal/user/auth"
+	"my-backend-project/internal/user/model"
+	"my-backend-project/internal/user/repository"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )

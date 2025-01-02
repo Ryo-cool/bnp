@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package task;
 
-option go_package = "github.com/my-backend-project/internal/task/pb";
+option go_package = "my-backend-project/internal/task/pb";
 
 import "google/protobuf/timestamp.proto";
 

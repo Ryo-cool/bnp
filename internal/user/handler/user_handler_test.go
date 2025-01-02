@@ -2,17 +2,19 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"my-backend-project/internal/pkg/validator"
+	"my-backend-project/internal/user/auth"
+	"my-backend-project/internal/user/handler"
+	"my-backend-project/internal/user/model"
+	"my-backend-project/internal/user/service"
+
 	"github.com/labstack/echo/v4"
-	"github.com/my-backend-project/internal/pkg/validator"
-	"github.com/my-backend-project/internal/user/auth"
-	"github.com/my-backend-project/internal/user/handler"
-	"github.com/my-backend-project/internal/user/model"
-	"github.com/my-backend-project/internal/user/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -21,7 +23,7 @@ type MockUserService struct {
 	mock.Mock
 }
 
-func (m *MockUserService) SignUp(ctx echo.Context, req *model.SignUpRequest) (*model.AuthResponse, error) {
+func (m *MockUserService) SignUp(ctx context.Context, req *model.SignUpRequest) (*model.AuthResponse, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -29,7 +31,7 @@ func (m *MockUserService) SignUp(ctx echo.Context, req *model.SignUpRequest) (*m
 	return args.Get(0).(*model.AuthResponse), args.Error(1)
 }
 
-func (m *MockUserService) Login(ctx echo.Context, req *model.LoginRequest) (*model.AuthResponse, error) {
+func (m *MockUserService) Login(ctx context.Context, req *model.LoginRequest) (*model.AuthResponse, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -123,6 +125,7 @@ func TestUserHandler_SignUp(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
+			c.SetRequest(req.WithContext(context.Background()))
 
 			err := h.SignUp(c)
 			assert.NoError(t, err)
@@ -191,6 +194,7 @@ func TestUserHandler_Login(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
+			c.SetRequest(req.WithContext(context.Background()))
 
 			err := h.Login(c)
 			assert.NoError(t, err)
@@ -263,6 +267,7 @@ func TestUserHandler_AuthMiddleware(t *testing.T) {
 			tt.setupAuth(req)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
+			c.SetRequest(req.WithContext(context.Background()))
 
 			middleware := h.AuthMiddleware(func(c echo.Context) error {
 				return c.NoContent(http.StatusOK)

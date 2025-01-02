@@ -6,14 +6,15 @@ import (
 	"os"
 	"time"
 
+	"my-backend-project/internal/pkg/validator"
+	"my-backend-project/internal/user/auth"
+	"my-backend-project/internal/user/handler"
+	"my-backend-project/internal/user/repository"
+	"my-backend-project/internal/user/service"
+
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/my-backend-project/internal/pkg/validator"
-	"github.com/my-backend-project/internal/user/auth"
-	"github.com/my-backend-project/internal/user/handler"
-	"github.com/my-backend-project/internal/user/repository"
-	"github.com/my-backend-project/internal/user/service"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
