@@ -9,9 +9,9 @@ import (
 	"log"
 	"net"
 
+	"github.com/my-backend-project/internal/pb"
 	"github.com/my-backend-project/internal/task/handler"
 	"github.com/my-backend-project/internal/task/interceptor"
-	"github.com/my-backend-project/internal/task/pb"
 	"github.com/my-backend-project/internal/task/repository"
 	"github.com/my-backend-project/internal/task/service"
 	"github.com/my-backend-project/internal/user/auth"

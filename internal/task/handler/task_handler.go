@@ -3,14 +3,13 @@ package handler
 import (
 	"context"
 
+	"github.com/my-backend-project/internal/pb"
 	"github.com/my-backend-project/internal/pkg/errors"
 	"github.com/my-backend-project/internal/task/model"
-	"github.com/my-backend-project/internal/task/pb"
 	"github.com/my-backend-project/internal/task/service"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -103,13 +102,13 @@ func (h *TaskHandler) UpdateTask(ctx context.Context, req *pb.UpdateTaskRequest)
 	}, nil
 }
 
-func (h *TaskHandler) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*emptypb.Empty, error) {
+func (h *TaskHandler) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*pb.Empty, error) {
 	err := h.taskService.DeleteTask(ctx, req.TaskId)
 	if err != nil {
 		return nil, convertErrorToGRPCStatus(err)
 	}
 
-	return &emptypb.Empty{}, nil
+	return &pb.Empty{}, nil
 }
 
 func convertTaskToProto(task *model.Task) *pb.Task {

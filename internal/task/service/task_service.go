@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
+	"github.com/my-backend-project/internal/pb"
 	"github.com/my-backend-project/internal/pkg/errors"
 	"github.com/my-backend-project/internal/task/model"
-	"github.com/my-backend-project/internal/task/pb"
 	"github.com/my-backend-project/internal/task/repository"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type ErrorType string
@@ -13,6 +14,7 @@ const (
 	NotFound     ErrorType = "not_found"
 	InvalidInput ErrorType = "invalid_input"
 	Internal     ErrorType = "internal"
+	Unauthorized ErrorType = "unauthorized"
 )
 
 type AppError struct {
@@ -31,6 +33,21 @@ func (e *AppError) Error() string {
 
 func (e *AppError) Unwrap() error {
 	return e.Err
+}
+
+func (e *AppError) GRPCStatus() *status.Status {
+	var code codes.Code
+	switch e.Type {
+	case NotFound:
+		code = codes.NotFound
+	case InvalidInput:
+		code = codes.InvalidArgument
+	case Unauthorized:
+		code = codes.Unauthenticated
+	default:
+		code = codes.Internal
+	}
+	return status.New(code, e.Error())
 }
 
 func NewNotFoundError(message string, err error) *AppError {
@@ -59,9 +76,9 @@ func NewInternalError(message string, err error) *AppError {
 
 func NewUnauthorizedError(message string, err error) *AppError {
 	return &AppError{
+		Type:    Unauthorized,
 		Message: message,
 		Err:     err,
-		Code:    codes.Unauthenticated,
 	}
 }
 

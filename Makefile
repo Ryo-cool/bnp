@@ -7,8 +7,8 @@ GOBIN := $(GOPATH)/bin
 
 # Protobufs関連の変数
 PROTOC := protoc
-PROTO_DIR := api/proto
-GO_OUT_DIR := internal
+PROTO_DIR := proto
+GO_OUT_DIR := internal/pb
 
 # 必要なツールのインストール
 tools:
@@ -22,11 +22,11 @@ proto: tools
 		--go_opt=paths=source_relative \
 		--go-grpc_out=$(GO_OUT_DIR) \
 		--go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/task/task.proto
+		$(PROTO_DIR)/task.proto
 
 # 生成されたコードを削除
 clean:
-	rm -f $(GO_OUT_DIR)/task/pb/*.pb.go
+	rm -f $(GO_OUT_DIR)/*.pb.go
 
 # ビルド
 build:
