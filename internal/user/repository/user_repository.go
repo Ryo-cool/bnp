@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"my-backend-project/internal/user/model"
+	"github.com/my-backend-project/internal/user/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

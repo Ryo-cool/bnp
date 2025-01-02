@@ -3,6 +3,8 @@ package errors
 import (
 	"errors"
 	"fmt"
+
+	"google.golang.org/grpc/codes"
 )
 
 type ErrorType string
@@ -17,6 +19,7 @@ type AppError struct {
 	Type    ErrorType
 	Message string
 	Err     error
+	Code    codes.Code
 }
 
 func (e *AppError) Error() string {
@@ -51,6 +54,14 @@ func NewInternalError(message string, err error) *AppError {
 		Type:    Internal,
 		Message: message,
 		Err:     err,
+	}
+}
+
+func NewUnauthorizedError(message string, err error) *AppError {
+	return &AppError{
+		Message: message,
+		Err:     err,
+		Code:    codes.Unauthenticated,
 	}
 }
 

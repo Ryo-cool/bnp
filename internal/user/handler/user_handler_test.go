@@ -8,11 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"my-backend-project/internal/pkg/validator"
-	"my-backend-project/internal/user/auth"
-	"my-backend-project/internal/user/handler"
-	"my-backend-project/internal/user/model"
-	"my-backend-project/internal/user/service"
+	"github.com/my-backend-project/internal/pkg/validator"
+	"github.com/my-backend-project/internal/user/auth"
+	"github.com/my-backend-project/internal/user/handler"
+	"github.com/my-backend-project/internal/user/model"
+	"github.com/my-backend-project/internal/user/service"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"

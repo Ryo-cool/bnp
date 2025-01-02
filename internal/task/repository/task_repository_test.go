@@ -307,10 +307,9 @@ func TestMongoTaskRepository_FindByUserID(t *testing.T) {
 		killCursors := mtest.CreateCursorResponse(0, "foo.bar", mtest.NextBatch)
 
 		// CountDocumentsのモックレスポンス
-		count := bson.D{
-			{Key: "ok", Value: 1},
+		count := mtest.CreateCursorResponse(1, "foo.bar", mtest.FirstBatch, bson.D{
 			{Key: "n", Value: int32(2)},
-		}
+		})
 
 		mt.AddMockResponses(first, second, killCursors, count)
 

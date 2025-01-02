@@ -136,7 +136,7 @@ func TestTaskHandler_GetTask(t *testing.T) {
 		resp, err := handler.GetTask(ctx, req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.Equal(t, expectedTask.ID.Hex(), resp.TaskId)
+		assert.Equal(t, expectedTask.ID.Hex(), resp.Task.TaskId)
 		mockService.AssertExpectations(t)
 	})
 
@@ -250,7 +250,7 @@ func TestTaskHandler_UpdateTask(t *testing.T) {
 		resp, err := handler.UpdateTask(ctx, req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.Equal(t, expectedTask.ID.Hex(), resp.TaskId)
+		assert.Equal(t, expectedTask.ID.Hex(), resp.Task.TaskId)
 		mockService.AssertExpectations(t)
 	})
 

@@ -3,7 +3,7 @@ package auth
 import (
 	"time"
 
-	"my-backend-project/internal/user/model"
+	"github.com/my-backend-project/internal/user/model"
 
 	"github.com/golang-jwt/jwt/v4"
 )
