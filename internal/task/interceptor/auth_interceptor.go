@@ -3,7 +3,7 @@ package interceptor
 import (
 	"context"
 
-	"my-backend-project/internal/user/auth"
+	"github.com/my-backend-project/internal/user/auth"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

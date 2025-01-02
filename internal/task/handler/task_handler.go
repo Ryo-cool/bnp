@@ -3,13 +3,15 @@ package handler
 import (
 	"context"
 
-	"my-backend-project/internal/task/model"
-	"my-backend-project/internal/task/pb"
-	"my-backend-project/internal/task/service"
+	"github.com/my-backend-project/internal/pkg/errors"
+	"github.com/my-backend-project/internal/task/model"
+	"github.com/my-backend-project/internal/task/pb"
+	"github.com/my-backend-project/internal/task/service"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type TaskHandler struct {
@@ -23,119 +25,124 @@ func NewTaskHandler(taskService service.TaskService) *TaskHandler {
 	}
 }
 
-func (h *TaskHandler) CreateTask(ctx context.Context, req *pb.CreateTaskRequest) (*pb.Task, error) {
-	userID, ok := ctx.Value("user_id").(string)
-	if !ok {
-		return nil, status.Error(codes.Internal, "could not get user_id from context")
-	}
-
+func (h *TaskHandler) CreateTask(ctx context.Context, req *pb.CreateTaskRequest) (*pb.CreateTaskResponse, error) {
 	task := &model.Task{
+		UserID:      req.UserId,
 		Title:       req.Title,
 		Description: req.Description,
-		UserID:      userID,
-		Status:      model.TaskStatus(req.Status),
+		Status:      model.TaskStatus(req.Status.String()),
+		DueDate:     req.DueDate.AsTime(),
 	}
 
 	createdTask, err := h.taskService.CreateTask(ctx, task)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to create task")
+		return nil, convertErrorToGRPCStatus(err)
 	}
 
-	return &pb.Task{
-		Id:          createdTask.ID.Hex(),
-		Title:       createdTask.Title,
-		Description: createdTask.Description,
-		Status:      pb.TaskStatus(createdTask.Status),
-		UserId:      createdTask.UserID,
+	return &pb.CreateTaskResponse{
+		TaskId: createdTask.ID.Hex(),
 	}, nil
 }
 
-func (h *TaskHandler) GetTask(ctx context.Context, req *pb.GetTaskRequest) (*pb.Task, error) {
-	objectID, err := primitive.ObjectIDFromHex(req.TaskId)
+func (h *TaskHandler) GetTask(ctx context.Context, req *pb.GetTaskRequest) (*pb.GetTaskResponse, error) {
+	task, err := h.taskService.GetTask(ctx, req.TaskId)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid task id")
+		return nil, convertErrorToGRPCStatus(err)
 	}
 
-	task, err := h.taskService.GetTask(ctx, objectID.Hex())
-	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to get task")
-	}
-
-	return &pb.Task{
-		Id:          task.ID.Hex(),
-		Title:       task.Title,
-		Description: task.Description,
-		Status:      pb.TaskStatus(task.Status),
-		UserId:      task.UserID,
+	return &pb.GetTaskResponse{
+		Task: convertTaskToProto(task),
 	}, nil
 }
 
 func (h *TaskHandler) ListTasks(ctx context.Context, req *pb.ListTasksRequest) (*pb.ListTasksResponse, error) {
-	userID, ok := ctx.Value("user_id").(string)
-	if !ok {
-		return nil, status.Error(codes.Internal, "could not get user_id from context")
+	var taskStatus *model.TaskStatus
+	if req.Status != pb.TaskStatus_TASK_STATUS_UNSPECIFIED {
+		status := model.TaskStatus(req.Status.String())
+		taskStatus = &status
 	}
 
-	tasks, err := h.taskService.ListTasks(ctx, userID)
+	tasks, total, err := h.taskService.ListTasks(ctx, req.UserId, taskStatus, req.PageSize, req.PageToken)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to list tasks")
+		return nil, convertErrorToGRPCStatus(err)
 	}
 
-	var taskResponses []*pb.Task
-	for _, task := range tasks {
-		taskResponses = append(taskResponses, &pb.Task{
-			Id:          task.ID.Hex(),
-			Title:       task.Title,
-			Description: task.Description,
-			Status:      pb.TaskStatus(task.Status),
-			UserId:      task.UserID,
-		})
+	var nextPageToken string
+	if len(tasks) > 0 {
+		nextPageToken = tasks[len(tasks)-1].ID.Hex()
+	}
+
+	taskResponses := make([]*pb.Task, len(tasks))
+	for i, task := range tasks {
+		taskResponses[i] = convertTaskToProto(task)
 	}
 
 	return &pb.ListTasksResponse{
-		Tasks: taskResponses,
+		Tasks:         taskResponses,
+		NextPageToken: nextPageToken,
+		TotalCount:    total,
 	}, nil
 }
 
-func (h *TaskHandler) UpdateTask(ctx context.Context, req *pb.UpdateTaskRequest) (*pb.Task, error) {
-	objectID, err := primitive.ObjectIDFromHex(req.TaskId)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid task id")
-	}
-
+func (h *TaskHandler) UpdateTask(ctx context.Context, req *pb.UpdateTaskRequest) (*pb.UpdateTaskResponse, error) {
 	task := &model.Task{
-		ID:          objectID,
+		UserID:      req.UserId,
 		Title:       req.Title,
 		Description: req.Description,
-		Status:      model.TaskStatus(req.Status),
+		Status:      model.TaskStatus(req.Status.String()),
+		DueDate:     req.DueDate.AsTime(),
 	}
 
-	updatedTask, err := h.taskService.UpdateTask(ctx, task)
+	updatedTask, err := h.taskService.UpdateTask(ctx, req.TaskId, task)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to update task")
+		return nil, convertErrorToGRPCStatus(err)
+	}
+
+	return &pb.UpdateTaskResponse{
+		Task: convertTaskToProto(updatedTask),
+	}, nil
+}
+
+func (h *TaskHandler) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*emptypb.Empty, error) {
+	err := h.taskService.DeleteTask(ctx, req.TaskId)
+	if err != nil {
+		return nil, convertErrorToGRPCStatus(err)
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func convertTaskToProto(task *model.Task) *pb.Task {
+	var status pb.TaskStatus
+	switch task.Status {
+	case model.TaskStatusPending:
+		status = pb.TaskStatus_TASK_STATUS_PENDING
+	case model.TaskStatusActive:
+		status = pb.TaskStatus_TASK_STATUS_ACTIVE
+	case model.TaskStatusComplete:
+		status = pb.TaskStatus_TASK_STATUS_COMPLETE
+	default:
+		status = pb.TaskStatus_TASK_STATUS_UNSPECIFIED
 	}
 
 	return &pb.Task{
-		Id:          updatedTask.ID.Hex(),
-		Title:       updatedTask.Title,
-		Description: updatedTask.Description,
-		Status:      pb.TaskStatus(updatedTask.Status),
-		UserId:      updatedTask.UserID,
-	}, nil
+		TaskId:      task.ID.Hex(),
+		UserId:      task.UserID,
+		Title:       task.Title,
+		Description: task.Description,
+		Status:      status,
+		DueDate:     timestamppb.New(task.DueDate),
+		CreatedAt:   timestamppb.New(task.CreatedAt),
+		UpdatedAt:   timestamppb.New(task.UpdatedAt),
+	}
 }
 
-func (h *TaskHandler) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*pb.DeleteTaskResponse, error) {
-	objectID, err := primitive.ObjectIDFromHex(req.TaskId)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid task id")
+func convertErrorToGRPCStatus(err error) error {
+	if errors.IsNotFound(err) {
+		return status.Error(codes.NotFound, err.Error())
 	}
-
-	_, err = h.taskService.DeleteTask(ctx, objectID.Hex())
-	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to delete task")
+	if errors.IsInvalidInput(err) {
+		return status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	return &pb.DeleteTaskResponse{
-		Success: true,
-	}, nil
+	return status.Error(codes.Internal, err.Error())
 }

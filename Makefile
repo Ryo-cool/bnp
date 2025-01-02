@@ -1,28 +1,42 @@
-.PHONY: proto test build run clean
+.PHONY: proto clean
 
-# Protocol Buffers
-proto:
-	protoc --go_out=. --go_opt=paths=source_relative \
-		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		proto/task.proto
+# Go関連の変数
+GOPATH := $(shell go env GOPATH)
+GO := go
+GOBIN := $(GOPATH)/bin
 
-# テスト実行
-test:
-	go test -v ./...
+# Protobufs関連の変数
+PROTOC := protoc
+PROTO_DIR := api/proto
+GO_OUT_DIR := internal
+
+# 必要なツールのインストール
+tools:
+	$(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	$(GO) install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+# Protoファイルからコードを生成
+proto: tools
+	$(PROTOC) --proto_path=$(PROTO_DIR) \
+		--go_out=$(GO_OUT_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(GO_OUT_DIR) \
+		--go-grpc_opt=paths=source_relative \
+		$(PROTO_DIR)/task/task.proto
+
+# 生成されたコードを削除
+clean:
+	rm -f $(GO_OUT_DIR)/task/pb/*.pb.go
 
 # ビルド
 build:
-	go build -o bin/user-service ./cmd/user-service
-	go build -o bin/task-service ./cmd/task-service
+	$(GO) build -o bin/server cmd/server/main.go
 
-# サービス実行
-run-user:
-	go run ./cmd/user-service/main.go
+# テスト
+test:
+	$(GO) test -v ./...
 
-run-task:
-	go run ./cmd/task-service/main.go
-
-# クリーンアップ
-clean:
-	rm -rf bin/
-	rm -f internal/task/pb/*.pb.go 
+# 依存関係の更新
+deps:
+	$(GO) mod tidy
+	$(GO) mod verify 

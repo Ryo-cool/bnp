@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-	"my-backend-project/internal/task/interceptor"
 	"os"
 	"time"
 
 	"log"
 	"net"
 
-	"my-backend-project/internal/task/handler"
-	"my-backend-project/internal/task/pb"
-	"my-backend-project/internal/task/repository"
-	"my-backend-project/internal/task/service"
-	"my-backend-project/internal/user/auth"
+	"github.com/my-backend-project/internal/task/handler"
+	"github.com/my-backend-project/internal/task/interceptor"
+	"github.com/my-backend-project/internal/task/pb"
+	"github.com/my-backend-project/internal/task/repository"
+	"github.com/my-backend-project/internal/task/service"
+	"github.com/my-backend-project/internal/user/auth"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

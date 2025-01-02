@@ -1,122 +1,74 @@
-# プロジェクト進捗状況
+# 進捗状況
 
-## 完了したタスク
-
-### ユーザーサービス
-
-- [x] モデルの実装
-- [x] バリデーターの実装
-- [x] リポジトリ層の実装
-- [x] サービス層の実装
-- [x] JWT サービスの実装
-- [x] ハンドラーの実装
-- [x] テストの実装
-  - [x] サービステスト
-  - [x] JWT サービステスト
-  - [x] ハンドラーテスト
+## 実装済み機能
 
 ### タスクサービス
 
-- [x] Protocol Buffers の定義
-- [x] モデルの実装
-- [x] リポジトリ層の実装
+- ✅ プロトコルバッファの定義
+- ✅ gRPC サービスの実装
+- ✅ MongoDB との連携
+- ✅ CRUD 操作の実装
+- ✅ JWT 認証の統合
+- ✅ ユニットテストの実装
 
-## 進行中のタスク
+### インフラストラクチャ
 
-- [ ] タスクサービスの実装
-  - [ ] サービス層の実装
-  - [ ] gRPC ハンドラーの実装
-  - [ ] テストの実装
-
-## 今後のタスク
-
-- [ ] Docker 関連ファイルの実装
-  - [ ] Dockerfile
-  - [ ] docker-compose.yml
-- [ ] CI/CD 設定の実装
-  - [ ] GitHub Actions
-  - [ ] テスト自動化
-  - [ ] デプロイメントパイプライン
-- [ ] ドキュメンテーション
-  - [ ] API 仕様書
-  - [ ] セットアップガイド
-  - [ ] 運用ガイド
-
-## 技術スタック
-
-- 言語: Go
-- フレームワーク: Echo
-- データベース: MongoDB
-- 認証: JWT
-- API: REST (ユーザーサービス), gRPC (タスクサービス)
-- テスト: testify
-- プロトコル: Protocol Buffers
-
-## プロジェクト構造
-
-```
-.
-├── cmd
-│   └── user-service
-│       └── main.go
-├── internal
-│   ├── pkg
-│   │   └── validator
-│   │       └── validator.go
-│   ├── task
-│   │   ├── model
-│   │   │   └── task.go
-│   │   ├── pb
-│   │   │   ├── task.pb.go
-│   │   │   └── task_grpc.pb.go
-│   │   └── repository
-│   │       └── task_repository.go
-│   └── user
-│       ├── auth
-│       │   └── jwt.go
-│       ├── handler
-│       │   └── user_handler.go
-│       ├── model
-│       │   └── user.go
-│       ├── repository
-│       │   └── user_repository.go
-│       └── service
-│           └── user_service.go
-├── proto
-│   ├── task.proto
-│   ├── task.pb.go
-│   └── task_grpc.pb.go
-├── test
-│   └── user
-│       ├── auth
-│       │   └── jwt_test.go
-│       ├── handler
-│       │   └── user_handler_test.go
-│       └── service
-│           └── user_service_test.go
-├── deployments
-│   └── docker
-│       └── docker-compose.yml
-├── docs
-│   └── progress.md
-├── .env.example
-├── go.mod
-└── go.sum
-```
-
-## 技術スタック
-
-- 言語: Go
-- フレームワーク: Echo
-- データベース: MongoDB
-- 認証: JWT
-- API: REST (ユーザーサービス), gRPC (タスクサービス)
-- テスト: testify
-- プロトコル: Protocol Buffers
+- ✅ Makefile の作成
+- ✅ 環境変数の設定
+- ✅ MongoDB 接続設定
 
 ## 次のステップ
 
-1. タスクサービスのサービス層実装
-2. gRPC ハンドラーの実装
-3. タスクサービスのテスト実装
-4. Docker 環境の構築
+### 優先度: 高
+
+1. エラーハンドリングの改善
+
+   - より詳細なエラーコードの実装
+   - エラーメッセージの国際化対応
+
+2. バリデーションの強化
+
+   - 入力値の検証ルールの追加
+   - カスタムバリデーターの実装
+
+3. ログ機能の実装
+   - 構造化ログの導入
+   - ログレベルの適切な設定
+
+### 優先度: 中
+
+1. メトリクス収集
+
+   - Prometheus の統合
+   - 主要メトリクスの定義
+
+2. ドキュメントの充実
+   - API ドキュメントの作成
+   - セットアップガイドの整備
+
+### 優先度: 低
+
+1. パフォーマンス最適化
+   - インデックス設計の見直し
+   - キャッシュ層の検討
+
+## 既知の課題
+
+1. テストカバレッジの向上が必要
+2. エラーハンドリングの統一的な実装が必要
+3. ログ出力の整備が必要
+
+## 今後の展望
+
+1. マイクロサービスアーキテクチャの拡張
+2. Kubernetes 対応の検討
+3. CI/CD パイプラインの構築
+
+## 技術スタック
+
+- 言語: Go
+- フレームワーク: gRPC
+- データベース: MongoDB
+- 認証: JWT
+- ビルド: Make
+- テスト: Go 標準テストフレームワーク
