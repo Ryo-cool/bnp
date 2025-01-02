@@ -30,7 +30,9 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: go mod download
+        run: |
+          go mod download
+          go mod tidy
 
       - name: Install Protoc
         run: |
