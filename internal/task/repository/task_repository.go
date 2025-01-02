@@ -2,14 +2,18 @@ package repository
 
 import (
 	"context"
-	"time"
-
+	"my-backend-project/internal/pkg/errors"
 	"my-backend-project/internal/task/model"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+var (
+	ErrTaskNotFound = errors.NewNotFoundError("task not found", nil)
 )
 
 type TaskRepository interface {
@@ -31,32 +35,29 @@ func NewTaskRepository(db *mongo.Database) TaskRepository {
 }
 
 func (r *mongoTaskRepository) Create(ctx context.Context, task *model.Task) (*model.Task, error) {
-	now := time.Now()
-	task.CreatedAt = now
-	task.UpdatedAt = now
+	task.ID = primitive.NewObjectID()
 
-	result, err := r.collection.InsertOne(ctx, task)
+	_, err := r.collection.InsertOne(ctx, task)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewInternalError("failed to insert task", err)
 	}
 
-	task.ID = result.InsertedID.(primitive.ObjectID)
 	return task, nil
 }
 
 func (r *mongoTaskRepository) FindByID(ctx context.Context, id string) (*model.Task, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewInvalidInputError("invalid task id", err)
 	}
 
 	var task model.Task
 	err = r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&task)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, nil
+			return nil, ErrTaskNotFound
 		}
-		return nil, err
+		return nil, errors.NewInternalError("failed to find task", err)
 	}
 	return &task, nil
 }
@@ -75,7 +76,7 @@ func (r *mongoTaskRepository) FindByUserID(ctx context.Context, userID string, s
 	if offset != "" {
 		objectID, err := primitive.ObjectIDFromHex(offset)
 		if err != nil {
-			return nil, 0, err
+			return nil, 0, errors.NewInvalidInputError("invalid offset id", err)
 		}
 		filter["_id"] = bson.M{"$gt": objectID}
 	}
@@ -83,13 +84,13 @@ func (r *mongoTaskRepository) FindByUserID(ctx context.Context, userID string, s
 	// 総件数の取得
 	total, err := r.collection.CountDocuments(ctx, filter)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errors.NewInternalError("failed to count tasks", err)
 	}
 
 	// タスクの取得
 	cursor, err := r.collection.Find(ctx, filter, findOptions)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errors.NewInternalError("failed to find tasks", err)
 	}
 	defer cursor.Close(ctx)
 
@@ -110,7 +111,10 @@ func (r *mongoTaskRepository) Update(ctx context.Context, task *model.Task) (*mo
 	var updatedTask model.Task
 	err := r.collection.FindOneAndUpdate(ctx, filter, update, options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(&updatedTask)
 	if err != nil {
-		return nil, err
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrTaskNotFound
+		}
+		return nil, errors.NewInternalError("failed to update task", err)
 	}
 
 	return &updatedTask, nil
@@ -119,13 +123,16 @@ func (r *mongoTaskRepository) Update(ctx context.Context, task *model.Task) (*mo
 func (r *mongoTaskRepository) Delete(ctx context.Context, id string) (*model.Task, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewInvalidInputError("invalid task id", err)
 	}
 
 	var task model.Task
 	err = r.collection.FindOneAndDelete(ctx, bson.M{"_id": objectID}).Decode(&task)
 	if err != nil {
-		return nil, err
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrTaskNotFound
+		}
+		return nil, errors.NewInternalError("failed to delete task", err)
 	}
 
 	return &task, nil
