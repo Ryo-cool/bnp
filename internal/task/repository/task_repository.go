@@ -13,11 +13,11 @@ import (
 )
 
 type TaskRepository interface {
-	Create(ctx context.Context, task *model.Task) error
+	Create(ctx context.Context, task *model.Task) (*model.Task, error)
 	FindByID(ctx context.Context, id string) (*model.Task, error)
 	FindByUserID(ctx context.Context, userID string, status *model.TaskStatus, limit int32, offset string) ([]*model.Task, int32, error)
-	Update(ctx context.Context, task *model.Task) error
-	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, task *model.Task) (*model.Task, error)
+	Delete(ctx context.Context, id string) (*model.Task, error)
 }
 
 type mongoTaskRepository struct {
@@ -30,13 +30,18 @@ func NewTaskRepository(db *mongo.Database) TaskRepository {
 	}
 }
 
-func (r *mongoTaskRepository) Create(ctx context.Context, task *model.Task) error {
+func (r *mongoTaskRepository) Create(ctx context.Context, task *model.Task) (*model.Task, error) {
 	now := time.Now()
 	task.CreatedAt = now
 	task.UpdatedAt = now
 
-	_, err := r.collection.InsertOne(ctx, task)
-	return err
+	result, err := r.collection.InsertOne(ctx, task)
+	if err != nil {
+		return nil, err
+	}
+
+	task.ID = result.InsertedID.(primitive.ObjectID)
+	return task, nil
 }
 
 func (r *mongoTaskRepository) FindByID(ctx context.Context, id string) (*model.Task, error) {
@@ -96,38 +101,32 @@ func (r *mongoTaskRepository) FindByUserID(ctx context.Context, userID string, s
 	return tasks, int32(total), nil
 }
 
-func (r *mongoTaskRepository) Update(ctx context.Context, task *model.Task) error {
+func (r *mongoTaskRepository) Update(ctx context.Context, task *model.Task) (*model.Task, error) {
 	task.UpdatedAt = time.Now()
 
 	filter := bson.M{"_id": task.ID}
 	update := bson.M{"$set": task}
 
-	result, err := r.collection.UpdateOne(ctx, filter, update)
+	var updatedTask model.Task
+	err := r.collection.FindOneAndUpdate(ctx, filter, update, options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(&updatedTask)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if result.MatchedCount == 0 {
-		return mongo.ErrNoDocuments
-	}
-
-	return nil
+	return &updatedTask, nil
 }
 
-func (r *mongoTaskRepository) Delete(ctx context.Context, id string) error {
+func (r *mongoTaskRepository) Delete(ctx context.Context, id string) (*model.Task, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	result, err := r.collection.DeleteOne(ctx, bson.M{"_id": objectID})
+	var task model.Task
+	err = r.collection.FindOneAndDelete(ctx, bson.M{"_id": objectID}).Decode(&task)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if result.DeletedCount == 0 {
-		return mongo.ErrNoDocuments
-	}
-
-	return nil
+	return &task, nil
 }

@@ -26,10 +26,9 @@ message Task {
 }
 
 enum TaskStatus {
-  TASK_STATUS_UNSPECIFIED = 0;
-  TASK_STATUS_TODO = 1;
-  TASK_STATUS_IN_PROGRESS = 2;
-  TASK_STATUS_DONE = 3;
+  PENDING = 0;
+  ACTIVE = 1;
+  COMPLETE = 2;
 }
 
 message CreateTaskRequest {
