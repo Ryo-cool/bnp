@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/my-backend-project/internal/pb"
-	"github.com/my-backend-project/internal/pkg/errors"
+	"github.com/my-backend-project/internal/pkg/apperrors"
 	"github.com/my-backend-project/internal/task/model"
 	"github.com/my-backend-project/internal/task/repository"
 
@@ -32,7 +32,7 @@ func NewTaskService(taskRepo repository.TaskRepository) TaskService {
 func (s *taskService) CreateTask(ctx context.Context, task *model.Task) (*model.Task, error) {
 	createdTask, err := s.taskRepo.Create(ctx, task)
 	if err != nil {
-		return nil, errors.NewInternalError("タスクの作成に失敗しました", err)
+		return nil, apperrors.NewInternalError("タスクの作成に失敗しました", err)
 	}
 	return createdTask, nil
 }
@@ -40,10 +40,10 @@ func (s *taskService) CreateTask(ctx context.Context, task *model.Task) (*model.
 func (s *taskService) GetTask(ctx context.Context, id string) (*model.Task, error) {
 	task, err := s.taskRepo.FindByID(ctx, id)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError("タスクが見つかりません", err)
+		if apperrors.IsNotFound(err) {
+			return nil, apperrors.NewNotFoundError("タスクが見つかりません", err)
 		}
-		return nil, errors.NewInternalError("タスクの取得に失敗しました", err)
+		return nil, apperrors.NewInternalError("タスクの取得に失敗しました", err)
 	}
 	return task, nil
 }
@@ -51,7 +51,7 @@ func (s *taskService) GetTask(ctx context.Context, id string) (*model.Task, erro
 func (s *taskService) ListTasks(ctx context.Context, userID string, status *model.TaskStatus, limit int32, offset string) ([]*model.Task, int32, error) {
 	tasks, total, err := s.taskRepo.FindByUserID(ctx, userID, status, limit, offset)
 	if err != nil {
-		return nil, 0, errors.NewInternalError("タスク一覧の取得に失敗しました", err)
+		return nil, 0, apperrors.NewInternalError("タスク一覧の取得に失敗しました", err)
 	}
 	return tasks, total, nil
 }
@@ -59,10 +59,10 @@ func (s *taskService) ListTasks(ctx context.Context, userID string, status *mode
 func (s *taskService) UpdateTask(ctx context.Context, id string, task *model.Task) (*model.Task, error) {
 	updatedTask, err := s.taskRepo.Update(ctx, id, task)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError("タスクが見つかりません", err)
+		if apperrors.IsNotFound(err) {
+			return nil, apperrors.NewNotFoundError("タスクが見つかりません", err)
 		}
-		return nil, errors.NewInternalError("タスクの更新に失敗しました", err)
+		return nil, apperrors.NewInternalError("タスクの更新に失敗しました", err)
 	}
 	return updatedTask, nil
 }
@@ -70,10 +70,10 @@ func (s *taskService) UpdateTask(ctx context.Context, id string, task *model.Tas
 func (s *taskService) DeleteTask(ctx context.Context, id string) error {
 	err := s.taskRepo.Delete(ctx, id)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return errors.NewNotFoundError("タスクが見つかりません", err)
+		if apperrors.IsNotFound(err) {
+			return apperrors.NewNotFoundError("タスクが見つかりません", err)
 		}
-		return errors.NewInternalError("タスクの削除に失敗しました", err)
+		return apperrors.NewInternalError("タスクの削除に失敗しました", err)
 	}
 	return nil
 }
@@ -95,7 +95,7 @@ func ModelToProto(task *model.Task) *pb.Task {
 func ProtoToModel(task *pb.Task) (*model.Task, error) {
 	id, err := primitive.ObjectIDFromHex(task.TaskId)
 	if err != nil {
-		return nil, errors.NewInvalidInputError("無効なIDです", err)
+		return nil, apperrors.NewInvalidInputError("無効なIDです", err)
 	}
 
 	return &model.Task{

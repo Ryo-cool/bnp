@@ -45,11 +45,7 @@ func main() {
 
 	// 依存関係の初期化
 	userRepo := repository.NewUserRepository(db)
-	jwtExpiration, err := time.ParseDuration(os.Getenv("JWT_EXPIRATION"))
-	if err != nil {
-		jwtExpiration = 24 * time.Hour // デフォルト値
-	}
-	jwtService := auth.NewJWTService(os.Getenv("JWT_SECRET"), jwtExpiration)
+	jwtService := auth.NewJWTService(os.Getenv("JWT_SECRET_KEY"))
 	userService := service.NewUserService(userRepo, jwtService)
 	userHandler := handler.NewUserHandler(userService, jwtService)
 

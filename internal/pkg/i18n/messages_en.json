@@ -1,0 +1,34 @@
+{
+    "error.invalid_input": "Invalid input: %s",
+    "error.not_found": "Resource not found: %s",
+    "error.already_exists": "Already exists: %s",
+    "error.unauthorized": "Authentication required",
+    "error.forbidden": "Permission denied",
+    "error.internal": "Internal server error",
+    
+    "task.created": "Task created: %s",
+    "task.updated": "Task updated: %s",
+    "task.deleted": "Task deleted: %s",
+    "task.not_found": "Task not found: %s",
+    "task.invalid_status": "Invalid task status: %s",
+    
+    "user.created": "User created: %s",
+    "user.updated": "User information updated: %s",
+    "user.deleted": "User deleted: %s",
+    "user.not_found": "User not found: %s",
+    "user.invalid_email": "Invalid email address: %s",
+    "user.invalid_password": "Password must be at least 8 characters long",
+    "user.already_exists": "This email address is already registered: %s",
+    
+    "auth.invalid_token": "Invalid token",
+    "auth.token_expired": "Token has expired",
+    "auth.invalid_credentials": "Invalid email or password",
+    "auth.login_success": "Successfully logged in",
+    "auth.logout_success": "Successfully logged out",
+    
+    "validation.required": "%s is required",
+    "validation.min_length": "%s must be at least %d characters long",
+    "validation.max_length": "%s must be at most %d characters long",
+    "validation.invalid_format": "Invalid format for %s",
+    "validation.invalid_value": "Invalid value for %s"
+} 
