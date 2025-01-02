@@ -95,21 +95,25 @@ my-backend-project/
 ├── .env.example // ローカル起動用の環境変数サンプル
 └── README.md
 
-ディレクトリ構造におけるポイント 1. cmd/
-各サービスのエントリーポイント。go build -o user-service ./cmd/user-service のようにビルド対象を明確化。 2. internal/
-• user, task のように、機能ごとにまとめる。
-• HTTP or gRPC のハンドラー (あるいは server) と、ビジネスロジック(UseCase)、DB リポジトリを分けることで、責務を明確にし、テストをしやすくする。
-• auth/ など認証関連はユーザーサービスだけでなくタスク側でも使うなら共通化しても良いが、初期のうちは分かりやすい形でも OK。 3. proto/
-• gRPC の .proto 定義を配置。
-• protoc + protoc-gen-go + protoc-gen-go-grpc などで生成される .pb.go は internal/task/pb/ などに生成して、依存を限定させるケースが多い。 4. test/
-• 単体テスト (unit) と 結合テスト (integration) を分けると管理しやすい。
-• テストは各機能別に配置し、Xxx_test.go 形式で分割。 5. deployments/
-• docker/ フォルダ配下で Dockerfile や docker-compose.yml を管理。
-• CI 設定 (GitHub Actions や CircleCI) は .github/workflows/xxx.yml などに置くか、deployments/ci/ などで一元管理しても構わない。 6. .env.example
-• 環境変数をまとめ、実運用では .env (git 管理外) に書き換えて使う運用を想定。
-• 例: MONGO_URI=mongodb://mongo:27017 / JWT_SECRET=your_jwt_secret / APP_ENV=dev 等
+ディレクトリ構造におけるポイント
 
-3. 開発フロー (例)
+1. cmd/
+   各サービスのエントリーポイント。go build -o user-service ./cmd/user-service のようにビルド対象を明確化。
+2. internal/
+   • user, task のように、機能ごとにまとめる。
+   • HTTP or gRPC のハンドラー (あるいは server) と、ビジネスロジック(UseCase)、DB リポジトリを分けることで、責務を明確にし、テストをしやすくする。
+   • auth/ など認証関連はユーザーサービスだけでなくタスク側でも使うなら共通化しても良いが、初期のうちは分かりやすい形でも OK。
+3. proto/
+   • gRPC の .proto 定義を配置。
+   • protoc + protoc-gen-go + protoc-gen-go-grpc などで生成される .pb.go は internal/task/pb/ などに生成して、依存を限定させるケースが多い。 4. test/
+   • 単体テスト (unit) と 結合テスト (integration) を分けると管理しやすい。
+   • テストは各機能別に配置し、Xxx_test.go 形式で分割。 5. deployments/
+   • docker/ フォルダ配下で Dockerfile や docker-compose.yml を管理。
+   • CI 設定 (GitHub Actions や CircleCI) は .github/workflows/xxx.yml などに置くか、deployments/ci/ などで一元管理しても構わない。 6. .env.example
+   • 環境変数をまとめ、実運用では .env (git 管理外) に書き換えて使う運用を想定。
+   • 例: MONGO_URI=mongodb://mongo:27017 / JWT_SECRET=your_jwt_secret / APP_ENV=dev 等
+
+4. 開発フロー (例)
 
    1. proto ファイル定義 → gRPC コード生成
       • task.proto を定義し、protoc で Go 用のスタブ生成 (make generate などのスクリプト化が便利)
@@ -133,7 +137,7 @@ my-backend-project/
       • GitHub Actions などでプルリクエスト時に自動実行 (lint + test)
       • master/main ブランチにマージされたら自動的に Docker イメージビルドと Push (オプション)
 
-4. まとめ
+5. まとめ
    • ドメイン (User/Task) ごとにディレクトリを分け、責務を明確にする
    • cmd/ でエントリーポイントを分離して、マイクロサービス化を意識
    • Docker Compose を使って、ローカルで複数サービス + DB を起動できるようにする

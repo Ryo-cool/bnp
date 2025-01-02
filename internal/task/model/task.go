@@ -12,10 +12,9 @@ import (
 type TaskStatus int32
 
 const (
-	TaskStatusUnspecified TaskStatus = 0
-	TaskStatusTodo        TaskStatus = 1
-	TaskStatusInProgress  TaskStatus = 2
-	TaskStatusDone        TaskStatus = 3
+	TaskStatusPending  TaskStatus = 0
+	TaskStatusActive   TaskStatus = 1
+	TaskStatusComplete TaskStatus = 2
 )
 
 type Task struct {
