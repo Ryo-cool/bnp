@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/my-backend-project/internal/pb"
-	"github.com/my-backend-project/internal/pkg/errors"
+	"github.com/my-backend-project/internal/pkg/apperrors"
 	"github.com/my-backend-project/internal/task/model"
 	"github.com/my-backend-project/internal/task/service"
 
@@ -137,10 +137,10 @@ func convertTaskToProto(task *model.Task) *pb.Task {
 }
 
 func convertErrorToGRPCStatus(err error) error {
-	if errors.IsNotFound(err) {
+	if apperrors.IsNotFound(err) {
 		return status.Error(codes.NotFound, err.Error())
 	}
-	if errors.IsInvalidInput(err) {
+	if apperrors.IsInvalidInput(err) {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
 	return status.Error(codes.Internal, err.Error())

@@ -1,0 +1,37 @@
+{
+    "error.invalid_input": "入力が不正です",
+    "error.not_found": "リソースが見つかりません",
+    "error.already_exists": "既に存在します",
+    "error.unauthorized": "認証が必要です",
+    "error.forbidden": "権限がありません",
+    "error.internal": "内部エラーが発生しました",
+    
+    "task.created": "タスクを作成しました: %s",
+    "task.updated": "タスクを更新しました: %s",
+    "task.deleted": "タスクを削除しました: %s",
+    "task.not_found": "タスクが見つかりません: %s",
+    "task.invalid_status": "無効なタスクステータスです: %s",
+    
+    "user.created": "ユーザーを作成しました: %s",
+    "user.updated": "ユーザー情報を更新しました: %s",
+    "user.deleted": "ユーザーを削除しました: %s",
+    "user.not_found": "ユーザーが見つかりません: %s",
+    "user.invalid_email": "無効なメールアドレスです: %s",
+    "user.invalid_password": "パスワードは8文字以上である必要があります",
+    "user.already_exists": "このメールアドレスは既に登録されています: %s",
+    
+    "auth.invalid_token": "無効なトークンです",
+    "auth.token_expired": "トークンの有効期限が切れています",
+    "auth.invalid_credentials": "メールアドレスまたはパスワードが正しくありません",
+    "auth.login_success": "ログインしました",
+    "auth.logout_success": "ログアウトしました",
+    
+    "validation.required": "このフィールドは必須です",
+    "validation.min_length": "%sは%d文字以上である必要があります",
+    "validation.max_length": "%sは%d文字以下である必要があります",
+    "validation.invalid_format": "%sの形式が正しくありません",
+    "validation.invalid_value": "%sの値が不正です",
+    "validation.email": "有効なメールアドレスを入力してください",
+    "validation.min": "最小%d文字必要です",
+    "validation.max": "最大%d文字までです"
+} 

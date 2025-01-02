@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/my-backend-project/internal/pb"
-	"github.com/my-backend-project/internal/pkg/errors"
+	"github.com/my-backend-project/internal/pkg/apperrors"
 	"github.com/my-backend-project/internal/task/model"
 
 	"github.com/stretchr/testify/assert"
@@ -102,7 +102,7 @@ func TestTaskHandler_CreateTask(t *testing.T) {
 			DueDate:     dueDate,
 		}
 
-		mockService.On("CreateTask", ctx, mock.AnythingOfType("*model.Task")).Return(nil, errors.NewInternalError("service error", nil)).Once()
+		mockService.On("CreateTask", ctx, mock.AnythingOfType("*model.Task")).Return(nil, apperrors.NewInternalError("service error", nil)).Once()
 
 		resp, err := handler.CreateTask(ctx, req)
 		assert.Error(t, err)
@@ -149,7 +149,7 @@ func TestTaskHandler_GetTask(t *testing.T) {
 			TaskId: taskID.Hex(),
 		}
 
-		mockService.On("GetTask", ctx, taskID.Hex()).Return(nil, errors.NewNotFoundError("タスクが見つかりません", nil)).Once()
+		mockService.On("GetTask", ctx, taskID.Hex()).Return(nil, apperrors.NewNotFoundError("タスクが見つかりません", nil)).Once()
 
 		resp, err := handler.GetTask(ctx, req)
 		assert.Error(t, err)
@@ -213,7 +213,7 @@ func TestTaskHandler_ListTasks(t *testing.T) {
 			PageToken: "",
 		}
 
-		mockService.On("ListTasks", ctx, "user1", mock.AnythingOfType("*model.TaskStatus"), int32(10), "").Return(nil, int32(0), errors.NewInternalError("service error", nil)).Once()
+		mockService.On("ListTasks", ctx, "user1", mock.AnythingOfType("*model.TaskStatus"), int32(10), "").Return(nil, int32(0), apperrors.NewInternalError("service error", nil)).Once()
 
 		resp, err := handler.ListTasks(ctx, req)
 		assert.Error(t, err)
@@ -272,7 +272,7 @@ func TestTaskHandler_UpdateTask(t *testing.T) {
 			DueDate:     dueDate,
 		}
 
-		mockService.On("UpdateTask", ctx, taskID.Hex(), mock.AnythingOfType("*model.Task")).Return(nil, errors.NewNotFoundError("タスクが見つかりません", nil)).Once()
+		mockService.On("UpdateTask", ctx, taskID.Hex(), mock.AnythingOfType("*model.Task")).Return(nil, apperrors.NewNotFoundError("タスクが見つかりません", nil)).Once()
 
 		resp, err := handler.UpdateTask(ctx, req)
 		assert.Error(t, err)
@@ -308,7 +308,7 @@ func TestTaskHandler_DeleteTask(t *testing.T) {
 			TaskId: taskID.Hex(),
 		}
 
-		mockService.On("DeleteTask", ctx, taskID.Hex()).Return(errors.NewNotFoundError("タスクが見つかりません", nil)).Once()
+		mockService.On("DeleteTask", ctx, taskID.Hex()).Return(apperrors.NewNotFoundError("タスクが見つかりません", nil)).Once()
 
 		resp, err := handler.DeleteTask(ctx, req)
 		assert.Error(t, err)

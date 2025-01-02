@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/my-backend-project/internal/pb"
-	"github.com/my-backend-project/internal/pkg/errors"
+	"github.com/my-backend-project/internal/pkg/apperrors"
 	"github.com/my-backend-project/internal/task/model"
 
 	"github.com/stretchr/testify/assert"
@@ -99,7 +99,7 @@ func TestTaskService_CreateTask(t *testing.T) {
 			DueDate:     time.Now(),
 		}
 
-		mockRepo.On("Create", ctx, task).Return(nil, errors.NewInternalError("repository error", nil)).Once()
+		mockRepo.On("Create", ctx, task).Return(nil, apperrors.NewInternalError("repository error", nil)).Once()
 
 		createdTask, err := service.CreateTask(ctx, task)
 		assert.Error(t, err)
@@ -140,12 +140,12 @@ func TestTaskService_GetTask(t *testing.T) {
 		ctx := context.Background()
 		taskID := primitive.NewObjectID()
 
-		mockRepo.On("FindByID", ctx, taskID.Hex()).Return(nil, errors.NewNotFoundError("タスクが見つかりません", nil)).Once()
+		mockRepo.On("FindByID", ctx, taskID.Hex()).Return(nil, apperrors.NewNotFoundError("タスクが見つかりません", nil)).Once()
 
 		task, err := service.GetTask(ctx, taskID.Hex())
 		assert.Error(t, err)
 		assert.Nil(t, task)
-		assert.True(t, errors.IsNotFound(err))
+		assert.True(t, apperrors.IsNotFound(err))
 		mockRepo.AssertExpectations(t)
 	})
 }
@@ -201,7 +201,7 @@ func TestTaskService_ListTasks(t *testing.T) {
 		limit := int32(10)
 		offset := ""
 
-		mockRepo.On("FindByUserID", ctx, userID, &status, limit, offset).Return(nil, int32(0), errors.NewInternalError("repository error", nil)).Once()
+		mockRepo.On("FindByUserID", ctx, userID, &status, limit, offset).Return(nil, int32(0), apperrors.NewInternalError("repository error", nil)).Once()
 
 		tasks, total, err := service.ListTasks(ctx, userID, &status, limit, offset)
 		assert.Error(t, err)
@@ -257,12 +257,12 @@ func TestTaskService_UpdateTask(t *testing.T) {
 			DueDate:     time.Now(),
 		}
 
-		mockRepo.On("Update", ctx, taskID.Hex(), task).Return(nil, errors.NewNotFoundError("タスクが見つかりません", nil)).Once()
+		mockRepo.On("Update", ctx, taskID.Hex(), task).Return(nil, apperrors.NewNotFoundError("タスクが見つかりません", nil)).Once()
 
 		updatedTask, err := service.UpdateTask(ctx, taskID.Hex(), task)
 		assert.Error(t, err)
 		assert.Nil(t, updatedTask)
-		assert.True(t, errors.IsNotFound(err))
+		assert.True(t, apperrors.IsNotFound(err))
 		mockRepo.AssertExpectations(t)
 	})
 }
@@ -286,11 +286,11 @@ func TestTaskService_DeleteTask(t *testing.T) {
 		ctx := context.Background()
 		taskID := primitive.NewObjectID()
 
-		mockRepo.On("Delete", ctx, taskID.Hex()).Return(errors.NewNotFoundError("タスクが見つかりません", nil)).Once()
+		mockRepo.On("Delete", ctx, taskID.Hex()).Return(apperrors.NewNotFoundError("タスクが見つかりません", nil)).Once()
 
 		err := service.DeleteTask(ctx, taskID.Hex())
 		assert.Error(t, err)
-		assert.True(t, errors.IsNotFound(err))
+		assert.True(t, apperrors.IsNotFound(err))
 		mockRepo.AssertExpectations(t)
 	})
 }
@@ -349,5 +349,5 @@ func TestProtoToModel(t *testing.T) {
 	task, err = ProtoToModel(invalidProtoTask)
 	assert.Error(t, err)
 	assert.Nil(t, task)
-	assert.True(t, errors.IsInvalidInput(err))
+	assert.True(t, apperrors.IsInvalidInput(err))
 }

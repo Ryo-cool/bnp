@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"log"
 	"net"
@@ -47,7 +46,7 @@ func main() {
 	taskService := service.NewTaskService(taskRepo)
 
 	// JWT サービスの初期化
-	jwtService := auth.NewJWTService(jwtSecretKey, 24*time.Hour)
+	jwtService := auth.NewJWTService(jwtSecretKey)
 
 	// 認証インターセプターの初期化
 	authInterceptor := interceptor.NewAuthInterceptor(jwtService)

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/my-backend-project/internal/pkg/errors"
+	"github.com/my-backend-project/internal/pkg/apperrors"
 	"github.com/my-backend-project/internal/task/model"
 
 	"github.com/stretchr/testify/assert"
@@ -55,7 +55,7 @@ func TestMongoTaskRepository_Create(t *testing.T) {
 		result, err := repo.Create(context.Background(), task)
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.IsType(t, &errors.AppError{}, err)
+		assert.IsType(t, &apperrors.AppError{}, err)
 	})
 }
 
@@ -96,7 +96,7 @@ func TestMongoTaskRepository_FindByID(t *testing.T) {
 		result, err := repo.FindByID(context.Background(), "invalid-id")
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.IsType(t, &errors.AppError{}, err)
+		assert.IsType(t, &apperrors.AppError{}, err)
 	})
 
 	mt.Run("not_found", func(mt *mtest.T) {
@@ -123,7 +123,7 @@ func TestMongoTaskRepository_FindByID(t *testing.T) {
 		result, err := repo.FindByID(context.Background(), taskID.Hex())
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.IsType(t, &errors.AppError{}, err)
+		assert.IsType(t, &apperrors.AppError{}, err)
 	})
 }
 
@@ -211,7 +211,7 @@ func TestMongoTaskRepository_Update(t *testing.T) {
 		result, err := repo.Update(context.Background(), taskID.Hex(), task)
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.IsType(t, &errors.AppError{}, err)
+		assert.IsType(t, &apperrors.AppError{}, err)
 	})
 }
 
@@ -236,7 +236,7 @@ func TestMongoTaskRepository_Delete(t *testing.T) {
 		repo := &mongoTaskRepository{collection: mt.Coll}
 		err := repo.Delete(context.Background(), "invalid-id")
 		assert.Error(t, err)
-		assert.IsType(t, &errors.AppError{}, err)
+		assert.IsType(t, &apperrors.AppError{}, err)
 	})
 
 	mt.Run("not_found", func(mt *mtest.T) {
@@ -265,7 +265,7 @@ func TestMongoTaskRepository_Delete(t *testing.T) {
 
 		err := repo.Delete(context.Background(), taskID.Hex())
 		assert.Error(t, err)
-		assert.IsType(t, &errors.AppError{}, err)
+		assert.IsType(t, &apperrors.AppError{}, err)
 	})
 }
 
@@ -338,6 +338,6 @@ func TestMongoTaskRepository_FindByUserID(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, tasks)
 		assert.Equal(t, int32(0), total)
-		assert.IsType(t, &errors.AppError{}, err)
+		assert.IsType(t, &apperrors.AppError{}, err)
 	})
 }
