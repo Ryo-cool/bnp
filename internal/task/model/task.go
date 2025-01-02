@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"my-backend-project/internal/task/pb"
+	"github.com/my-backend-project/internal/task/pb"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/types/known/timestamppb"

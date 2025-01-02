@@ -1,4 +1,4 @@
-module my-backend-project
+module github.com/my-backend-project
 
 go 1.21
 
