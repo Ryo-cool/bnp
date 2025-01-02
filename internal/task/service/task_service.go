@@ -3,109 +3,82 @@ package service
 import (
 	"context"
 
-	"my-backend-project/internal/pkg/errors"
 	"my-backend-project/internal/task/model"
 	"my-backend-project/internal/task/repository"
 )
 
 type TaskService interface {
-	CreateTask(ctx context.Context, task *model.Task) (*model.Task, error)
+	CreateTask(ctx context.Context, req *model.CreateTaskRequest) (*model.Task, error)
 	GetTask(ctx context.Context, id string) (*model.Task, error)
-	ListTasks(ctx context.Context, userID string) ([]*model.Task, error)
-	UpdateTask(ctx context.Context, task *model.Task) (*model.Task, error)
-	DeleteTask(ctx context.Context, id string) (*model.Task, error)
+	ListTasks(ctx context.Context, userID string, status *model.TaskStatus, limit int32, offset string) ([]*model.Task, int32, error)
+	UpdateTask(ctx context.Context, req *model.UpdateTaskRequest) (*model.Task, error)
+	DeleteTask(ctx context.Context, id string, userID string) (*model.Task, error)
 }
 
 type taskService struct {
-	repo repository.TaskRepository
+	taskRepo repository.TaskRepository
 }
 
-func NewTaskService(repo repository.TaskRepository) TaskService {
+func NewTaskService(taskRepo repository.TaskRepository) TaskService {
 	return &taskService{
-		repo: repo,
+		taskRepo: taskRepo,
 	}
 }
 
-func (s *taskService) CreateTask(ctx context.Context, task *model.Task) (*model.Task, error) {
-	if task.Title == "" {
-		return nil, errors.NewInvalidInputError("title is required", nil)
+func (s *taskService) CreateTask(ctx context.Context, req *model.CreateTaskRequest) (*model.Task, error) {
+	task := &model.Task{
+		UserID:      req.UserID,
+		Title:       req.Title,
+		Description: req.Description,
+		Status:      req.Status,
+		DueDate:     req.DueDate,
+		CreatedAt:   req.DueDate,
+		UpdatedAt:   req.DueDate,
 	}
 
-	createdTask, err := s.repo.Create(ctx, task)
-	if err != nil {
-		return nil, errors.NewInternalError("failed to create task in repository", err)
-	}
-
-	return createdTask, nil
+	return s.taskRepo.Create(ctx, task)
 }
 
 func (s *taskService) GetTask(ctx context.Context, id string) (*model.Task, error) {
-	task, err := s.repo.FindByID(ctx, id)
-	if err != nil {
-		if err == repository.ErrTaskNotFound {
-			return nil, errors.NewNotFoundError("task not found", err)
-		}
-		return nil, errors.NewInternalError("failed to get task from repository", err)
-	}
-
-	return task, nil
+	return s.taskRepo.FindByID(ctx, id)
 }
 
-func (s *taskService) ListTasks(ctx context.Context, userID string) ([]*model.Task, error) {
-	if userID == "" {
-		return nil, errors.NewInvalidInputError("user_id is required", nil)
-	}
-
-	tasks, _, err := s.repo.FindByUserID(ctx, userID, nil, 0, "")
-	if err != nil {
-		return nil, errors.NewInternalError("failed to list tasks from repository", err)
-	}
-
-	return tasks, nil
+func (s *taskService) ListTasks(ctx context.Context, userID string, status *model.TaskStatus, limit int32, offset string) ([]*model.Task, int32, error) {
+	return s.taskRepo.FindByUserID(ctx, userID, status, limit, offset)
 }
 
-func (s *taskService) UpdateTask(ctx context.Context, task *model.Task) (*model.Task, error) {
-	if task.ID.IsZero() {
-		return nil, errors.NewInvalidInputError("task id is required", nil)
-	}
-
-	if task.Title == "" {
-		return nil, errors.NewInvalidInputError("title is required", nil)
-	}
-
-	existingTask, err := s.repo.FindByID(ctx, task.ID.Hex())
+func (s *taskService) UpdateTask(ctx context.Context, req *model.UpdateTaskRequest) (*model.Task, error) {
+	// 既存のタスクを取得
+	task, err := s.taskRepo.FindByID(ctx, req.TaskID)
 	if err != nil {
-		if err == repository.ErrTaskNotFound {
-			return nil, errors.NewNotFoundError("task not found", err)
-		}
-		return nil, errors.NewInternalError("failed to get task from repository", err)
+		return nil, err
 	}
 
-	// 既存のタスクの値を保持
-	task.UserID = existingTask.UserID
-	task.CreatedAt = existingTask.CreatedAt
-
-	updatedTask, err := s.repo.Update(ctx, task)
-	if err != nil {
-		return nil, errors.NewInternalError("failed to update task in repository", err)
+	// ユーザーIDの確認
+	if task.UserID != req.UserID {
+		return nil, repository.ErrTaskNotFound
 	}
 
-	return updatedTask, nil
+	// タスクの更新
+	task.Title = req.Title
+	task.Description = req.Description
+	task.Status = req.Status
+	task.DueDate = req.DueDate
+
+	return s.taskRepo.Update(ctx, task)
 }
 
-func (s *taskService) DeleteTask(ctx context.Context, id string) (*model.Task, error) {
-	_, err := s.repo.FindByID(ctx, id)
+func (s *taskService) DeleteTask(ctx context.Context, id string, userID string) (*model.Task, error) {
+	// 既存のタスクを取得
+	task, err := s.taskRepo.FindByID(ctx, id)
 	if err != nil {
-		if err == repository.ErrTaskNotFound {
-			return nil, errors.NewNotFoundError("task not found", err)
-		}
-		return nil, errors.NewInternalError("failed to get task from repository", err)
+		return nil, err
 	}
 
-	deletedTask, err := s.repo.Delete(ctx, id)
-	if err != nil {
-		return nil, errors.NewInternalError("failed to delete task from repository", err)
+	// ユーザーIDの確認
+	if task.UserID != userID {
+		return nil, repository.ErrTaskNotFound
 	}
 
-	return deletedTask, nil
+	return s.taskRepo.Delete(ctx, id)
 }
