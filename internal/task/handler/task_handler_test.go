@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -298,7 +297,7 @@ func TestTaskHandler_DeleteTask(t *testing.T) {
 		resp, err := handler.DeleteTask(ctx, req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.IsType(t, &emptypb.Empty{}, resp)
+		assert.IsType(t, &pb.Empty{}, resp)
 		mockService.AssertExpectations(t)
 	})
 
