@@ -5,13 +5,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/my-backend-project/internal/pb"
 	"github.com/my-backend-project/internal/pkg/errors"
 	"github.com/my-backend-project/internal/task/model"
-	"github.com/my-backend-project/internal/task/pb"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -62,12 +63,13 @@ func TestTaskHandler_CreateTask(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		ctx := context.Background()
+		dueDate := timestamppb.Now()
 		req := &pb.CreateTaskRequest{
 			UserId:      "user1",
 			Title:       "Test Task",
 			Description: "Test Description",
 			Status:      pb.TaskStatus_TASK_STATUS_PENDING,
-			DueDate:     timestamppb.Now(),
+			DueDate:     dueDate,
 		}
 
 		expectedTask := &model.Task{
@@ -92,12 +94,13 @@ func TestTaskHandler_CreateTask(t *testing.T) {
 
 	t.Run("service_error", func(t *testing.T) {
 		ctx := context.Background()
+		dueDate := timestamppb.Now()
 		req := &pb.CreateTaskRequest{
 			UserId:      "user1",
 			Title:       "Test Task",
 			Description: "Test Description",
 			Status:      pb.TaskStatus_TASK_STATUS_PENDING,
-			DueDate:     timestamppb.Now(),
+			DueDate:     dueDate,
 		}
 
 		mockService.On("CreateTask", ctx, mock.AnythingOfType("*model.Task")).Return(nil, errors.NewInternalError("service error", nil)).Once()
@@ -164,6 +167,7 @@ func TestTaskHandler_ListTasks(t *testing.T) {
 		ctx := context.Background()
 		req := &pb.ListTasksRequest{
 			UserId:    "user1",
+			Status:    pb.TaskStatus_TASK_STATUS_PENDING,
 			PageSize:  10,
 			PageToken: "",
 		}
@@ -191,7 +195,7 @@ func TestTaskHandler_ListTasks(t *testing.T) {
 			},
 		}
 
-		mockService.On("ListTasks", ctx, "user1", (*model.TaskStatus)(nil), int32(10), "").Return(expectedTasks, int32(2), nil).Once()
+		mockService.On("ListTasks", ctx, "user1", mock.AnythingOfType("*model.TaskStatus"), int32(10), "").Return(expectedTasks, int32(2), nil).Once()
 
 		resp, err := handler.ListTasks(ctx, req)
 		assert.NoError(t, err)
@@ -205,11 +209,12 @@ func TestTaskHandler_ListTasks(t *testing.T) {
 		ctx := context.Background()
 		req := &pb.ListTasksRequest{
 			UserId:    "user1",
+			Status:    pb.TaskStatus_TASK_STATUS_PENDING,
 			PageSize:  10,
 			PageToken: "",
 		}
 
-		mockService.On("ListTasks", ctx, "user1", (*model.TaskStatus)(nil), int32(10), "").Return(nil, int32(0), errors.NewInternalError("service error", nil)).Once()
+		mockService.On("ListTasks", ctx, "user1", mock.AnythingOfType("*model.TaskStatus"), int32(10), "").Return(nil, int32(0), errors.NewInternalError("service error", nil)).Once()
 
 		resp, err := handler.ListTasks(ctx, req)
 		assert.Error(t, err)
@@ -225,13 +230,14 @@ func TestTaskHandler_UpdateTask(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctx := context.Background()
 		taskID := primitive.NewObjectID()
+		dueDate := timestamppb.Now()
 		req := &pb.UpdateTaskRequest{
 			TaskId:      taskID.Hex(),
 			UserId:      "user1",
 			Title:       "Updated Task",
 			Description: "Updated Description",
 			Status:      pb.TaskStatus_TASK_STATUS_ACTIVE,
-			DueDate:     timestamppb.Now(),
+			DueDate:     dueDate,
 		}
 
 		expectedTask := &model.Task{
@@ -257,13 +263,14 @@ func TestTaskHandler_UpdateTask(t *testing.T) {
 	t.Run("not_found", func(t *testing.T) {
 		ctx := context.Background()
 		taskID := primitive.NewObjectID()
+		dueDate := timestamppb.Now()
 		req := &pb.UpdateTaskRequest{
 			TaskId:      taskID.Hex(),
 			UserId:      "user1",
 			Title:       "Updated Task",
 			Description: "Updated Description",
 			Status:      pb.TaskStatus_TASK_STATUS_ACTIVE,
-			DueDate:     timestamppb.Now(),
+			DueDate:     dueDate,
 		}
 
 		mockService.On("UpdateTask", ctx, taskID.Hex(), mock.AnythingOfType("*model.Task")).Return(nil, errors.NewNotFoundError("タスクが見つかりません", nil)).Once()
@@ -291,6 +298,7 @@ func TestTaskHandler_DeleteTask(t *testing.T) {
 		resp, err := handler.DeleteTask(ctx, req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
+		assert.IsType(t, &emptypb.Empty{}, resp)
 		mockService.AssertExpectations(t)
 	})
 
