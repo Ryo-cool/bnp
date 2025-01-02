@@ -1,0 +1,48 @@
+name: PR Test
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/workflows/**'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Install Protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
+
+      - name: Generate Proto files
+        run: make proto
+
+      - name: Run Tests
+        run: make test
+        env:
+          MONGODB_URI: mongodb://localhost:27017
+          JWT_SECRET_KEY: test-secret-key
