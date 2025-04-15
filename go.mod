@@ -6,7 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/go-playground/validator/v10 v10.23.0
-	github.com/golang-jwt/jwt/v4 v4.5.1
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/stretchr/testify v1.10.0
